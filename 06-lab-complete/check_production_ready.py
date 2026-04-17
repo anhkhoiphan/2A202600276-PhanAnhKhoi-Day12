@@ -13,8 +13,14 @@ import subprocess
 
 
 def check(name: str, passed: bool, detail: str = "") -> dict:
-    icon = "✅" if passed else "❌"
-    print(f"  {icon} {name}" + (f" — {detail}" if detail else ""))
+    try:
+        icon = "✅" if passed else "❌"
+        line = f"  {icon} {name}" + (f" — {detail}" if detail else "")
+        print(line)
+    except UnicodeEncodeError:
+        icon = "[OK]" if passed else "[FAIL]"
+        line = f"  {icon} {name}" + (f" — {detail}" if detail else "")
+        print(line)
     return {"name": name, "passed": passed}
 
 
@@ -27,7 +33,7 @@ def run_checks():
     print("=" * 55)
 
     # ── Files ──────────────────���───────────────────
-    print("\n📁 Required Files")
+    print("\n[FILES] Required Files")
     results.append(check("Dockerfile exists",
                          os.path.exists(os.path.join(base, "Dockerfile"))))
     results.append(check("docker-compose.yml exists",
@@ -43,7 +49,7 @@ def run_checks():
                          os.path.exists(os.path.join(base, "render.yaml"))))
 
     # ── Security ──────────────────────────────────���
-    print("\n🔒 Security")
+    print("\n[SECURITY] Security")
 
     # Check .env not tracked
     env_file = os.path.join(base, ".env")
@@ -53,7 +59,7 @@ def run_checks():
     env_ignored = False
     for gi in [gitignore, root_gitignore]:
         if os.path.exists(gi):
-            content = open(gi).read()
+            content = open(gi, encoding="utf-8").read()
             if ".env" in content:
                 env_ignored = True
                 break
@@ -66,7 +72,7 @@ def run_checks():
     for f in ["app/main.py", "app/config.py"]:
         fpath = os.path.join(base, f)
         if os.path.exists(fpath):
-            content = open(fpath).read()
+            content = open(fpath, encoding="utf-8").read()
             for bad in ["sk-", "password123", "hardcoded"]:
                 if bad in content:
                     secrets_found.append(f"{f}:{bad}")
@@ -75,10 +81,10 @@ def run_checks():
                          str(secrets_found) if secrets_found else ""))
 
     # ── API Endpoints ────────────────────────────��─
-    print("\n🌐 API Endpoints (code check)")
+    print("\n[API] API Endpoints (code check)")
     main_py = os.path.join(base, "app", "main.py")
     if os.path.exists(main_py):
-        content = open(main_py).read()
+        content = open(main_py, encoding="utf-8").read()
         results.append(check("/health endpoint defined",
                              '"/health"' in content or "'/health'" in content))
         results.append(check("/ready endpoint defined",
@@ -95,10 +101,10 @@ def run_checks():
         results.append(check("app/main.py exists", False, "Create app/main.py!"))
 
     # ── Docker ─────────────────────────────────────
-    print("\n🐳 Docker")
+    print("\n[DOCKER] Docker")
     dockerfile = os.path.join(base, "Dockerfile")
     if os.path.exists(dockerfile):
-        content = open(dockerfile).read()
+        content = open(dockerfile, encoding="utf-8").read()
         results.append(check("Multi-stage build",
                              "AS builder" in content or "AS runtime" in content))
         results.append(check("Non-root user",
@@ -110,7 +116,7 @@ def run_checks():
 
     dockerignore = os.path.join(base, ".dockerignore")
     if os.path.exists(dockerignore):
-        content = open(dockerignore).read()
+        content = open(dockerignore, encoding="utf-8").read()
         results.append(check(".dockerignore covers .env",
                              ".env" in content))
         results.append(check(".dockerignore covers __pycache__",
@@ -125,7 +131,10 @@ def run_checks():
     print(f"  Result: {passed}/{total} checks passed ({pct}%)")
 
     if pct == 100:
-        print("  🎉 PRODUCTION READY! Deploy nào!")
+        try:
+            print("  🎉 PRODUCTION READY! Deploy nào!")
+        except UnicodeEncodeError:
+            print("  [SUCCESS] PRODUCTION READY! Deploy nào!")
     elif pct >= 80:
         print("  ✅ Almost there! Fix the ❌ items above.")
     elif pct >= 60:
