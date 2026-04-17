@@ -15,7 +15,7 @@ services:
     region: singapore         # Chọn region gần user nhất
     plan: free                # free | starter | standard | pro
 
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r 03-cloud-deployment/render/requirements.txt
     startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
 
     healthCheckPath: /health   # Render check path này
