@@ -39,6 +39,25 @@ day12_ha-tang-cloud_va_deployment/
 
 ---
 
+## ☁️ Cloud Deployment
+
+Production agent đã được deploy lên Railway:
+
+**URL:** https://lab12vinuniproject-production.up.railway.app/
+
+```bash
+# Health check
+curl https://lab12vinuniproject-production.up.railway.app/health
+
+# Hỏi AI (cần X-API-Key)
+curl -X POST https://lab12vinuniproject-production.up.railway.app/ask \
+  -H "X-API-Key: <key>" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Xin chào!"}'
+```
+
+---
+
 ## 🚀 Bắt Đầu Nhanh
 
 **Muốn thử ngay?** → [QUICK_START.md](QUICK_START.md) (5 phút)
